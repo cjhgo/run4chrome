@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="CodeMirror/lib/codemirror.css">
+<link rel="stylesheet" href="CodeMirror/theme/ambiance.css">
+<script src="CodeMirror/lib/codemirror.js"></script>
+<script src="CodeMirror/mode/javascript/javascript.js"></script>
+<script src="jquery.js"></script>
+<style>
+    * {margin:0;padding:0;}
+    #__run_widget {
+        width:960px;
+        margin:auto;
+        margin-top:20px;
+        padding:10px;
+        border:#999 solid 1px;
+        text-align:left;
+        background-image:url("img/bg.png");
+        -webkit-box-shadow:0px 0px 20px #999;
+        -webkit-border-radius:5px;
+    }
+    #__run_header {height:25px;text-align:left;}
+    #__run_logo {font-family:Arial,Verdana,Sans-serif;text-decoration: none;font-size:12px;background-color:red;padding:5px;-webkit-border-radius:3px;}
+    #__run_logo strong {color:white;}
+    #__run_slogan {color:#494949;font-size:12px;}
+    #__run_editor {float:left;width:49%;height:300px;}
+    #__run_out {float:left;width:50%;height:300px;margin-left:5px;background-color:#202020;color:#8f9d6a;}
+</style>
+</head>
+<body>
+<div id='__run_widget'>
+    <div id='__run_header'>
+        <a id='__run_logo' href='http://www.fanrenxiu.com/blog/index.php/tag/run' target='_blank' title='访问扩展网站'><strong>Run!</strong></a>
+        <span id='__run_slogan'>- 在当前页面运行js代码, 左边为编辑器, 右边为输出窗口, 快捷键: ctrl+alt+z </span>
+        <input id='__run_btn' type='button' value=' 运行 ' /><input id='__run_clear_btn' type='button' value=' 清空输出 ' />
+    </div>
+    <div id='__run_editor'></div>
+    <textarea id='__run_out'>
+[info]说明:
+[info]+ 可以调用jQuery函数.
+[info]+ 您的代码将运行在单独的空间中, 原网页中的js脚本不可见.
+[info]+ 以__run开头的id为本扩展保留id, 请不要使用.
+[info]+ 使用__run__.print(str, clear)输出字符串,
+[info] &nbsp;其中str:string为要输出的字符串,
+[info] &nbsp;clear:boolean为true时先清空现有的输出.
+[info]+ 使用__run__.clear()清空现有输出.
+    </textarea>
+    <div style='clear:both;'></div>
+</div>
+<script>
+$(function() {
+    var myCodeMirror = CodeMirror(document.getElementById('__run_editor'), {
+        mode:  'javascript',
+        lineNumbers: true,
+        matchBrackets: true,
+        indentUnit: 4,
+        gutter: true,
+        value: '__run__.print("he110 w0r1d!");'
+    });
+    
+    var onMessage = chrome.extension.onMessage || chrome.extension.onRequest;
+    var sendMessage = chrome.extension.sendMessage || chrome.extension.sendRequest;
+    
+    onMessage.addListener(function(request, sender, sendResponse) {
+        if (request.id === 'tabprint') {
+            $('#__run_out').val($('#__run_out').val() + '\n' + request.str);
+            $('#__run_out').scrollTop(document.getElementById('__run_out').scrollHeight);
+        } else if (request.id === 'tabclear') {
+            $('#__run_out').val('');
+        }
+    });
+    
+    myCodeMirror.setOption('theme', 'ambiance');    
+    
+    $('#__run_btn').click(function() {
+        var js = myCodeMirror.getValue();
+        if (js !== '') {
+            sendMessage({id:'run', 'js':js});
+        }
+    });
+    
+    $('#__run_clear_btn').click(function() {
+        $('#__run_out').val('');
+    })
+    
+    document.body.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey === true ) && (e.altKey === true) && (e.keyCode === 90)) {
+            sendMessage({id:'toggle'});
+        }
+    });
+});
+</script>
+</body>
+</html>

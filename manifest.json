@@ -1,0 +1,18 @@
+{
+  "name": "Run!",
+  "version": "0.2.2",
+  "description": "在浏览器页面中编辑运行js代码(支持jQuery), 快捷键: ctrl+alt+z",
+  "permissions": [
+    "http://*/*", "https://*/*", "tabs"
+  ],
+  "background": {
+    "scripts": ["bg.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["jquery.js", "inject.js"]
+    }
+  ],
+  "update_url": "http://www.fanrenxiu.com/res/upload/run/updates.xml"
+}
